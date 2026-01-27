@@ -18,6 +18,7 @@ A secure weather application built with PHP and MySQL that includes user authent
 - XSS protection using output escaping (`htmlspecialchars`) on the server side
 - Prevention of DOM-based XSS by avoiding `innerHTML` and using safe DOM updates
 - API keys stored securely using environment variables (`.env`)
+- Protected dashboard routes (unauthenticated users cannot access dashboard)
 
 ## Tech Stack
 - HTML5
