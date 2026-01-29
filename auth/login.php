@@ -1,5 +1,4 @@
 <?php
-// SESSION + BASIC SECURITY
 session_start();
 
 // DB CONNECTION
@@ -34,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // FETCH USER
             $stmt = $con->prepare(
                 "SELECT id, name, password, failed_attempts, lock_until 
-                 FROM user_table WHERE email = ?"
+                 FROM avnadmin WHERE email = ?"
             );
             $stmt->execute([$email]);
             $user = $stmt->fetch();
@@ -44,8 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $current_time = time();
 
                 // ACCOUNT LOCK CHECK
-                if (!empty($user['lock_until']) && $user['lock_until'] > $current_time) {
-                    $wait = ceil(($user['lock_until'] - $current_time) / 60);
+                if (!empty($user['lock_until']) && strtotime($user['lock_until']) > $current_time) {
+                    $wait = ceil((strtotime($user['lock_until']) - $current_time) / 60);
                     $msg = "Account locked. Try after {$wait} minute(s).";
                 } else {
 
@@ -54,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         // RESET FAILED ATTEMPTS
                         $reset = $con->prepare(
-                            "UPDATE user_table 
+                            "UPDATE avnadmin 
                              SET failed_attempts = 0, lock_until = NULL 
                              WHERE id = ?"
                         );
@@ -77,11 +76,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $lock_until = null;
 
                         if ($attempts >= 5) {
-                            $lock_until = time() + (15 * 60); // 15 minutes
+                            $lock_until = date('Y-m-d H:i:s', time() + (15 * 60));
                         }
 
                         $update = $con->prepare(
-                            "UPDATE user_table 
+                            "UPDATE avnadmin 
                              SET failed_attempts = ?, lock_until = ? 
                              WHERE id = ?"
                         );
@@ -98,36 +97,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-    <link rel="stylesheet" href="loginstyle.css">
+<meta charset="UTF-8">
+<title>Login</title>
+<link rel="stylesheet" href="loginstyle.css">
 </head>
 <body>
 
 <div class="container">
-    <h1>Login</h1>
+<h1>Login</h1>
 
-    <?php if (!empty($msg)): ?>
-        <div class="error-msg"><?php echo htmlspecialchars($msg); ?></div>
-    <?php endif; ?>
+<?php if (!empty($msg)): ?>
+<div class="error-msg"><?php echo htmlspecialchars($msg); ?></div>
+<?php endif; ?>
 
-    <form method="post" autocomplete="off">
-        <input type="hidden" name="csrf_token"
-               value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+<form method="post" autocomplete="off">
+<input type="hidden" name="csrf_token"
+value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 
-        <label>Email</label>
-        <input type="email" name="email" required>
+<label>Email</label>
+<input type="email" name="email" required>
 
-        <label>Password</label>
-        <input type="password" name="password" required>
+<label>Password</label>
+<input type="password" name="password" required>
 
-        <input type="submit" value="Login">
-        <p>Don't have an account? <a href="register.php">Register</a></p>
-    </form>
+<input type="submit" value="Login">
+<p>Don't have an account? <a href="register.php">Register</a></p>
+</form>
 </div>
 
 </body>
