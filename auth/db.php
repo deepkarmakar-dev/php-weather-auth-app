@@ -18,13 +18,14 @@ try {
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false,
 
-        // AIVEN SSL FIX
+        // SSL REQUIRED FOR AIVEN
+        PDO::MYSQL_ATTR_SSL_CA => null,
         PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false
     ];
 
     $con = new PDO($dsn, $db_user, $db_pass, $options);
 
 } catch (PDOException $e) {
-    die($e->getMessage()); // temp debug
+    die("DB Error: " . $e->getMessage());
 }
 ?>
