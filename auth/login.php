@@ -1,29 +1,21 @@
 <?php
-
-//    SESSION + BASIC SECURITY
-
+// SESSION + BASIC SECURITY
 session_start();
 
-
-//    DB CONNECTION
-
+// DB CONNECTION
 require_once "db.php";
 
 $msg = "";
 
-
-//    CSRF TOKEN
-
+// CSRF TOKEN
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-
-//    LOGIN PROCESS
-
+// LOGIN PROCESS
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // CSRF CHECK 
+    // CSRF CHECK
     if (
         !isset($_POST['csrf_token']) ||
         !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])
@@ -39,39 +31,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $msg = "Invalid email or password";
         } else {
 
-        //    FETCH USER 
+            // FETCH USER
             $stmt = $con->prepare(
                 "SELECT id, name, password, failed_attempts, lock_until 
                  FROM user_table WHERE email = ?"
             );
-            $stmt->bind_param("s", $email);
-            $stmt->execute();
-            $result = $stmt->get_result();
+            $stmt->execute([$email]);
+            $user = $stmt->fetch();
 
-            if ($result->num_rows === 1) {
+            if ($user) {
 
-                $user = $result->fetch_assoc();
                 $current_time = time();
 
-                //  ACCOUNT LOCK CHECK 
+                // ACCOUNT LOCK CHECK
                 if (!empty($user['lock_until']) && $user['lock_until'] > $current_time) {
                     $wait = ceil(($user['lock_until'] - $current_time) / 60);
                     $msg = "Account locked. Try after {$wait} minute(s).";
                 } else {
 
-                    // PASSWORD VERIFY 
+                    // PASSWORD VERIFY
                     if (password_verify($password, $user['password'])) {
 
-                        // RESET FAILED ATTEMPTS 
+                        // RESET FAILED ATTEMPTS
                         $reset = $con->prepare(
                             "UPDATE user_table 
                              SET failed_attempts = 0, lock_until = NULL 
                              WHERE id = ?"
                         );
-                        $reset->bind_param("i", $user['id']);
-                        $reset->execute();
+                        $reset->execute([$user['id']]);
 
-                        // SECURE SESSION 
+                        // SECURE SESSION
                         session_regenerate_id(true);
                         unset($_SESSION['csrf_token']);
 
@@ -85,10 +74,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         // WRONG PASSWORD
                         $attempts = $user['failed_attempts'] + 1;
-                        $lock_until = NULL;
+                        $lock_until = null;
 
                         if ($attempts >= 5) {
-                            $lock_until = strtotime("+15 minutes");
+                            $lock_until = time() + (15 * 60); // 15 minutes
                         }
 
                         $update = $con->prepare(
@@ -96,17 +85,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                              SET failed_attempts = ?, lock_until = ? 
                              WHERE id = ?"
                         );
-                        $update->bind_param("iii", $attempts, $lock_until, $user['id']);
-                        $update->execute();
+                        $update->execute([$attempts, $lock_until, $user['id']]);
 
                         $msg = "Invalid email or password";
                     }
                 }
+
             } else {
                 $msg = "Invalid email or password";
             }
-
-            $stmt->close();
         }
     }
 }
