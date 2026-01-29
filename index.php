@@ -5,7 +5,7 @@
 session_set_cookie_params([
     'lifetime' => 0,
     'path'     => '/',
-    'secure'   => false, // HTTPS pe true kar dena
+    'secure'   => true, // HTTPS pe true kar dena
     'httponly' => true,
     'samesite' => 'Strict'
 ]);
