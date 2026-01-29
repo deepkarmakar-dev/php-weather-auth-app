@@ -1,26 +1,28 @@
 <?php
 require_once dirname(__DIR__) . '/env.php';
 
-// ERROR HANDLING (PRODUCTION SAFE)
-ini_set('display_errors', 0);
-ini_set('display_startup_errors', 0);
-error_reporting(0);
+// ERROR HANDLING (DEBUGGING KE LIYE ISE 1 RAKHEIN, BAAD MEIN 0 KAR DENA)
+ini_set('display_errors', 1); 
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-mysqli_report(MYSQLI_REPORT_OFF);
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-// DATABASE CONFIG (FROM .env)
+// DATABASE CONFIG (FROM RENDER ENVIRONMENT)
 $db_host = getenv('DB_HOST');
 $db_user = getenv('DB_USER');
 $db_pass = getenv('DB_PASS');
 $db_name = getenv('DB_NAME');
+$db_port = getenv('DB_PORT') ?: 3306; // Agar port nahi mila toh default 3306
 
-// DATABASE CONNECTION
-$con = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
+// DATABASE CONNECTION (YAHAN PORT ADD KIYA HAI)
+$con = mysqli_connect($db_host, $db_user, $db_pass, $db_name, $db_port);
 
 if (!$con) {
     error_log("Database Connection Failed: " . mysqli_connect_error());
-    die("Service temporarily unavailable");
+    die("Connection failed: " . mysqli_connect_error()); // Debugging ke liye error message dikhayega
 }
 
 // CHARACTER SET
 mysqli_set_charset($con, "utf8mb4");
+?>
