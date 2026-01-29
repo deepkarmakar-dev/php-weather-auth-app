@@ -60,7 +60,7 @@ if (empty($_SESSION['csrf_token'])) {
     <header class="navbar">
         <div class="logo">
             <img src="images/logo.png" alt="logo" class="logo-img">
-            <span>WEATHER APP</span>
+            <span>SkyCast</span>
         </div>
 
         <div class="search-bar">
