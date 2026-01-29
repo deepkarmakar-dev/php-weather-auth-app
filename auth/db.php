@@ -6,21 +6,21 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+// mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);  // REMOVE
 
-// DATABASE CONFIG (FROM RENDER ENVIRONMENT)
+// DATABASE CONFIG
 $db_host = getenv('DB_HOST');
 $db_user = getenv('DB_USER');
 $db_pass = getenv('DB_PASS');
 $db_name = getenv('DB_NAME');
-$db_port = getenv('DB_PORT') ?: 3306; // Agar port nahi mila toh default 3306
+$db_port = getenv('DB_PORT') ?: 3306;
 
-// DATABASE CONNECTION (YAHAN PORT ADD KIYA HAI)
+// DATABASE CONNECTION
 $con = mysqli_connect($db_host, $db_user, $db_pass, $db_name, $db_port);
 
 if (!$con) {
     error_log("Database Connection Failed: " . mysqli_connect_error());
-    die("Connection failed: " . mysqli_connect_error()); // Debugging ke liye error message dikhayega
+    die("Connection failed: " . mysqli_connect_error());
 }
 
 // CHARACTER SET
