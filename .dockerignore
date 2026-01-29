@@ -1,3 +1,40 @@
+# GIT
 .git
+.gitignore
+
+# ENV FILES
 .env
+.env.*
+*.env
+
+# NODE
 node_modules
+npm-debug.log
+yarn.lock
+pnpm-lock.yaml
+
+# PHP / COMPOSER
+vendor
+composer.lock
+
+# IDE / OS
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# LOGS
+*.log
+
+# TEST / DOCS
+tests
+docs
+README.md
+
+# DOCKER FILES
+docker-compose.yml
+Dockerfile
+
+# CACHE
+.cache
+.tmp
