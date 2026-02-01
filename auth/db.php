@@ -1,7 +1,8 @@
 <?php
 require_once dirname(__DIR__) . '/env.php';
 
-ini_set('display_errors', 1);
+/*  error show mat karo */
+ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
 $db_host = getenv('DB_HOST');
@@ -18,7 +19,6 @@ try {
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false,
 
-        // SSL REQUIRED FOR AIVEN
         PDO::MYSQL_ATTR_SSL_CA => null,
         PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false
     ];
@@ -26,6 +26,12 @@ try {
     $con = new PDO($dsn, $db_user, $db_pass, $options);
 
 } catch (PDOException $e) {
-    die("DB Error: " . $e->getMessage());
+
+    /*  error log ho jayega (user ko nahi dikhega) */
+    error_log($e->getMessage());
+
+    /*  real error user ko mat do */
+    http_response_code(500);
+    exit('Something went wrong.');
 }
 ?>
